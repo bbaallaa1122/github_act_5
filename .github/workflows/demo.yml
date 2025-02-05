@@ -18,6 +18,8 @@ jobs:
   build:
     needs: test
     runs-on: windows-latest
+    output:
+      file: ${{ steps.publish.outputs.file }}
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -25,20 +27,23 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
+      - name: update_file_name
+        id: publish
+        run: find dist/assets/*.js -type f -execdir echo 'file={}' >>$GITHUB_OUTPUT ';'
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-         name: dist-files
-         path: dist
+          name: dist-files
+          path: dist
   deploy:
     needs: build
     runs-on: windows-latest
     steps:
       - name: downloading artifacts
         uses: actions/download-artifact@v4
-        with :
+        with:
           name: dist-files
-      - name: output 
+      - name: output
         run: ls
       - name: Deploy
         run: echo "Deploying..."
