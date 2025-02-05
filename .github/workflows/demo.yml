@@ -18,7 +18,7 @@ jobs:
   build:
     needs: test
     runs-on: windows-latest
-    output:
+    outputs:
       file: ${{ steps.publish.outputs.file }}
     steps:
       - name: Get code
