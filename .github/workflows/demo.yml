@@ -10,12 +10,14 @@ jobs:
       - name: Get code
         uses: actions/checkout@v3
       - name: Cache dependencies
+        id: cache
         uses: actions/cache@v4
         with:
           path: node_modules
           key: deps-node-modules-${{ hashfiles('**/package-lock.json') }}
           restore-keys: deps-node-modules-
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Lint code
         run: npm run lint
@@ -30,12 +32,14 @@ jobs:
       - name: Get code
         uses: actions/checkout@v3
       - name: Restore dependencies from cache
+        id: cache
         uses: actions/cache@v4
         with:
           path: node_modules
           key: deps-node-modules-${{ hashfiles('**/package-lock.json') }}
           restore-keys: deps-node-modules-
       - name: Install dependencies (if cache miss)
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Build website
         run: npm run build
