@@ -9,15 +9,22 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
-      - name: cache dependencies
+      - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.npm
+          path: node_modules
           key: deps-node-modules-${{ hashfiles('**/package-lock.json') }}
-          restore-keys: |
-            deps-node-modules-
+          restore-keys: deps-node-modules-
       - name: Install dependencies
         run: npm ci
+      - name: Verify node_modules cache content
+        run: ls -la node_modules
+      - name: Save node_modules cache (explicit)
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: deps-node-modules-${{ hashfiles('**/package-lock.json') }}
       - name: Lint code
         run: npm run lint
       - name: Test code
@@ -30,23 +37,24 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
-      - name: cache dependencies
+      - name: Restore dependencies from cache
         uses: actions/cache@v4
         with:
-          path: ~/.npm
+          path: node_modules
           key: deps-node-modules-${{ hashfiles('**/package-lock.json') }}
-          restore-keys: |
-            deps-node-modules-
-      - name: Install dependencies
+          restore-keys: deps-node-modules-
+      - name: Verify node_modules cache in build
+        run: ls -la node_modules
+      - name: Install dependencies (if cache miss)
         run: npm ci
       - name: Build website
         run: npm run build
-      - name: update_file_name
+      - name: Update file name
         id: publish
         run: |
           $file = Get-ChildItem -Path dist/assets/*.js | Select-Object -First 1
           echo "file=$($file.FullName)" >> $env:GITHUB_OUTPUT
-      - name: upload artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist-files
@@ -55,12 +63,14 @@ jobs:
     needs: build
     runs-on: windows-latest
     steps:
-      - name: downloading artifacts
+      - name: Downloading artifacts
         uses: actions/download-artifact@v4
         with:
           name: dist-files
           path: dist
-      - name: list dist directory
+      - name: List dist directory
         run: ls dist
+      - name: Output file name from build
+        run: echo "${{ needs.build.outputs.file }}"
       - name: Deploy
         run: echo "Deploying..."
