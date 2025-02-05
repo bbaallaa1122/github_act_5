@@ -5,7 +5,7 @@ on:
       - master
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -17,7 +17,7 @@ jobs:
         run: npm run test
   build:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -32,7 +32,7 @@ jobs:
          path: dist
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Deploy
         run: echo "Deploying..."
