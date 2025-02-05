@@ -53,18 +53,23 @@ jobs:
           name: dist-files
           path: dist
   deploy:
-    needs: [test,build]
+    needs:
+      - test
+      - build
     runs-on: windows-latest
+    if: always()
     steps:
       - name: Downloading artifacts
+        if: success()
         uses: actions/download-artifact@v4
         with:
           name: dist-files
           path: dist
       - name: List dist directory
+        if: success()
         run: ls dist
       - name: Output file name from build
         if: failure()
-        run: echo "${{ needs.build.outputs.file }}"
+        run: echo "Build failed, no file to output."
       - name: Deploy
-        run: echo "Deploying..."
+        run: echo "Deploying regardless of previous job outcomes..."
