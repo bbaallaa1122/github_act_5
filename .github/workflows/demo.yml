@@ -24,7 +24,6 @@ jobs:
       - name: Test code
         run: npm run test
   build:
-    needs: test
     runs-on: windows-latest
     outputs:
       file: ${{ steps.publish.outputs.file }}
@@ -54,7 +53,7 @@ jobs:
           name: dist-files
           path: dist
   deploy:
-    needs: build
+    needs: [test,build]
     runs-on: windows-latest
     steps:
       - name: Downloading artifacts
@@ -65,6 +64,7 @@ jobs:
       - name: List dist directory
         run: ls dist
       - name: Output file name from build
+        if: failure()
         run: echo "${{ needs.build.outputs.file }}"
       - name: Deploy
         run: echo "Deploying..."
