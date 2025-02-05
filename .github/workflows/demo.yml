@@ -35,8 +35,6 @@ jobs:
           path: node_modules
           key: deps-node-modules-${{ hashfiles('**/package-lock.json') }}
           restore-keys: deps-node-modules-
-      - name: Verify node_modules cache in build
-        run: ls -la node_modules
       - name: Install dependencies (if cache miss)
         run: npm ci
       - name: Build website
